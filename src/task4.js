@@ -10,8 +10,6 @@ let referenceSpace = null
 let controller
 
 let modelTemplate = null
-let demoCount = 0
-let demoBtn = null
 
 init()
 renderer.setAnimationLoop(render)
@@ -46,56 +44,22 @@ function init() {
 
   window.addEventListener('resize', onResize)
 
-  if (!('xr' in navigator)) {
-    setupDemoMode()
-    loadModel()
-    return
-  }
+  document.body.appendChild(
+    ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] })
+  )
 
-  navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
-    if (!supported) {
-      setupDemoMode()
-      loadModel()
-      return
-    }
+  const ringGeo = new THREE.RingGeometry(0.06, 0.08, 32).rotateX(-Math.PI / 2)
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+  reticle = new THREE.Mesh(ringGeo, ringMat)
+  reticle.matrixAutoUpdate = false
+  reticle.visible = false
+  scene.add(reticle)
 
-    document.body.appendChild(
-      ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] })
-    )
+  controller = renderer.xr.getController(0)
+  controller.addEventListener('select', onSelect)
+  scene.add(controller)
 
-    const ringGeo = new THREE.RingGeometry(0.06, 0.08, 32).rotateX(-Math.PI / 2)
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-    reticle = new THREE.Mesh(ringGeo, ringMat)
-    reticle.matrixAutoUpdate = false
-    reticle.visible = false
-    scene.add(reticle)
-
-    controller = renderer.xr.getController(0)
-    controller.addEventListener('select', onSelect)
-    scene.add(controller)
-
-    loadModel()
-  })
-}
-
-function setupDemoMode() {
-  const btn = document.createElement('button')
-  btn.textContent = 'Loading model...'
-  btn.disabled = true
-  btn.style.position = 'fixed'
-  btn.style.left = '12px'
-  btn.style.top = '12px'
-  btn.style.zIndex = '9999'
-  btn.style.padding = '10px 12px'
-  btn.style.fontSize = '16px'
-  btn.style.background = '#ffffff'
-  btn.style.border = '1px solid #ccc'
-  btn.style.borderRadius = '6px'
-  btn.style.cursor = 'pointer'
-  document.body.appendChild(btn)
-
-  demoBtn = btn
-  btn.addEventListener('click', placeDemoModel)
+  loadModel()
 }
 
 function loadModel() {
@@ -108,12 +72,10 @@ function loadModel() {
       modelTemplate = gltf.scene
 
       modelTemplate.traverse((obj) => {
-        if (obj.isMesh) {
-          if (obj.material) {
-            obj.material.metalness = obj.material.metalness ?? 0.0
-            obj.material.roughness = obj.material.roughness ?? 1.0
-            obj.material.needsUpdate = true
-          }
+        if (obj.isMesh && obj.material) {
+          obj.material.metalness = obj.material.metalness ?? 0.0
+          obj.material.roughness = obj.material.roughness ?? 1.0
+          obj.material.needsUpdate = true
         }
       })
 
@@ -122,38 +84,10 @@ function loadModel() {
       modelTemplate.position.sub(center)
 
       modelTemplate.scale.set(0.25, 0.25, 0.25)
-
-      if (demoBtn) {
-        demoBtn.textContent = 'Place model (demo)'
-        demoBtn.disabled = false
-      }
     },
     undefined,
-    (e) => {
-      console.error('GLTF load error:', e)
-      if (demoBtn) {
-        demoBtn.textContent = 'Model load failed'
-        demoBtn.disabled = true
-      }
-    }
+    (e) => console.error('GLTF load error:', e)
   )
-}
-
-function placeDemoModel() {
-  if (!modelTemplate) return
-
-  demoCount++
-
-  const model = modelTemplate.clone(true)
-
-  const step = 0.4
-  const col = (demoCount - 1) % 4
-  const row = Math.floor((demoCount - 1) / 4)
-
-  model.position.set(col * step - 0.6, row * step - 0.3, -1)
-  model.rotation.y = demoCount * 0.4
-
-  scene.add(model)
 }
 
 function onSelect() {
@@ -168,7 +102,7 @@ function onSelect() {
 }
 
 function render(timestamp, frame) {
-  if (frame && reticle) {
+  if (frame) {
     const session = renderer.xr.getSession()
 
     if (!hitTestSourceRequested) {
