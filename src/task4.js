@@ -11,6 +11,7 @@ let controller
 
 let modelTemplate = null
 let demoCount = 0
+let demoBtn = null
 
 init()
 renderer.setAnimationLoop(render)
@@ -43,10 +44,11 @@ function init() {
   fill.position.set(-2, 2, -2)
   scene.add(fill)
 
+  window.addEventListener('resize', onResize)
+
   if (!('xr' in navigator)) {
     setupDemoMode()
     loadModel()
-    window.addEventListener('resize', onResize)
     return
   }
 
@@ -74,8 +76,26 @@ function init() {
 
     loadModel()
   })
+}
 
-  window.addEventListener('resize', onResize)
+function setupDemoMode() {
+  const btn = document.createElement('button')
+  btn.textContent = 'Loading model...'
+  btn.disabled = true
+  btn.style.position = 'fixed'
+  btn.style.left = '12px'
+  btn.style.top = '12px'
+  btn.style.zIndex = '9999'
+  btn.style.padding = '10px 12px'
+  btn.style.fontSize = '16px'
+  btn.style.background = '#ffffff'
+  btn.style.border = '1px solid #ccc'
+  btn.style.borderRadius = '6px'
+  btn.style.cursor = 'pointer'
+  document.body.appendChild(btn)
+
+  demoBtn = btn
+  btn.addEventListener('click', placeDemoModel)
 }
 
 function loadModel() {
@@ -94,8 +114,6 @@ function loadModel() {
             obj.material.roughness = obj.material.roughness ?? 1.0
             obj.material.needsUpdate = true
           }
-          obj.castShadow = true
-          obj.receiveShadow = true
         }
       })
 
@@ -104,28 +122,21 @@ function loadModel() {
       modelTemplate.position.sub(center)
 
       modelTemplate.scale.set(0.25, 0.25, 0.25)
+
+      if (demoBtn) {
+        demoBtn.textContent = 'Place model (demo)'
+        demoBtn.disabled = false
+      }
     },
     undefined,
-    (e) => console.error('GLTF load error:', e)
+    (e) => {
+      console.error('GLTF load error:', e)
+      if (demoBtn) {
+        demoBtn.textContent = 'Model load failed'
+        demoBtn.disabled = true
+      }
+    }
   )
-}
-
-function setupDemoMode() {
-  const btn = document.createElement('button')
-  btn.textContent = 'Place model (demo)'
-  btn.style.position = 'fixed'
-  btn.style.left = '12px'
-  btn.style.top = '12px'
-  btn.style.zIndex = '9999'
-  btn.style.padding = '10px 12px'
-  btn.style.fontSize = '16px'
-  btn.style.background = '#ffffff'
-  btn.style.border = '1px solid #ccc'
-  btn.style.borderRadius = '6px'
-  btn.style.cursor = 'pointer'
-  document.body.appendChild(btn)
-
-  btn.addEventListener('click', placeDemoModel)
 }
 
 function placeDemoModel() {
@@ -146,7 +157,7 @@ function placeDemoModel() {
 }
 
 function onSelect() {
-  if (!reticle.visible || !modelTemplate) return
+  if (!reticle || !reticle.visible || !modelTemplate) return
 
   const model = modelTemplate.clone(true)
 
