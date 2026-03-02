@@ -34,26 +34,66 @@ function init() {
   dir.position.set(1, 2, 1)
   scene.add(dir)
 
-  document.body.appendChild(
-    ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] })
-  )
+  if (!('xr' in navigator)) {
+    setupDemoMode()
+    window.addEventListener('resize', onResize)
+    return
+  }
 
-  const ringGeo = new THREE.RingGeometry(0.06, 0.08, 32).rotateX(-Math.PI / 2)
-  const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-  reticle = new THREE.Mesh(ringGeo, ringMat)
-  reticle.matrixAutoUpdate = false
-  reticle.visible = false
-  scene.add(reticle)
+  navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+    if (!supported) {
+      setupDemoMode()
+      return
+    }
 
-  controller = renderer.xr.getController(0)
-  controller.addEventListener('select', onSelect)
-  scene.add(controller)
+    document.body.appendChild(
+      ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] })
+    )
+
+    const ringGeo = new THREE.RingGeometry(0.06, 0.08, 32).rotateX(-Math.PI / 2)
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+    reticle = new THREE.Mesh(ringGeo, ringMat)
+    reticle.matrixAutoUpdate = false
+    reticle.visible = false
+    scene.add(reticle)
+
+    controller = renderer.xr.getController(0)
+    controller.addEventListener('select', onSelect)
+    scene.add(controller)
+  })
 
   window.addEventListener('resize', onResize)
 }
 
+function setupDemoMode() {
+  const btn = document.createElement('button')
+  btn.textContent = 'Place cone (demo)'
+  btn.style.position = 'fixed'
+  btn.style.left = '12px'
+  btn.style.top = '12px'
+  btn.style.zIndex = '9999'
+  btn.style.padding = '10px 12px'
+  btn.style.fontSize = '16px'
+  document.body.appendChild(btn)
+
+  btn.addEventListener('click', placeDemoCone)
+  window.addEventListener('pointerdown', placeDemoCone)
+}
+
+function placeDemoCone() {
+  const geo = new THREE.ConeGeometry(0.15, 0.3, 32)
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xff8844,
+    roughness: 0.7,
+    metalness: 0.0,
+  })
+  const cone = new THREE.Mesh(geo, mat)
+  cone.position.set(0, 0, -1)
+  scene.add(cone)
+}
+
 function onSelect() {
-  if (!reticle.visible) return
+  if (!reticle || !reticle.visible) return
 
   const geo = new THREE.ConeGeometry(0.08, 0.18, 32)
   const mat = new THREE.MeshStandardMaterial({
@@ -70,7 +110,7 @@ function onSelect() {
 }
 
 function render(timestamp, frame) {
-  if (frame) {
+  if (frame && reticle) {
     const session = renderer.xr.getSession()
 
     if (!hitTestSourceRequested) {
