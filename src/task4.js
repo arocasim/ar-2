@@ -80,7 +80,7 @@ function init() {
 
 function loadModel() {
   const loader = new GLTFLoader()
-  const modelUrl = `${import.meta.env.BASE_URL}models/scene_plant.gltf`
+  const modelUrl = `${import.meta.env.BASE_URL}models/task4/scene_plant.gltf`
 
   loader.load(
     modelUrl,
