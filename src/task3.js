@@ -8,6 +8,8 @@ let hitTestSourceRequested = false
 let referenceSpace = null
 let controller
 
+let demoCount = 0
+
 init()
 renderer.setAnimationLoop(render)
 
@@ -74,13 +76,23 @@ function setupDemoMode() {
   btn.style.zIndex = '9999'
   btn.style.padding = '10px 12px'
   btn.style.fontSize = '16px'
+  btn.style.background = '#ffffff'
+  btn.style.border = '1px solid #ccc'
+  btn.style.borderRadius = '6px'
+  btn.style.cursor = 'pointer'
+  btn.style.pointerEvents = 'auto'
   document.body.appendChild(btn)
 
   btn.addEventListener('click', placeDemoCone)
-  window.addEventListener('pointerdown', placeDemoCone)
+  window.addEventListener('pointerdown', (e) => {
+    if (e.target === btn) return
+    placeDemoCone()
+  })
 }
 
 function placeDemoCone() {
+  demoCount++
+
   const geo = new THREE.ConeGeometry(0.15, 0.3, 32)
   const mat = new THREE.MeshStandardMaterial({
     color: 0xff8844,
@@ -88,7 +100,14 @@ function placeDemoCone() {
     metalness: 0.0,
   })
   const cone = new THREE.Mesh(geo, mat)
-  cone.position.set(0, 0, -1)
+
+  const step = 0.28
+  const col = (demoCount - 1) % 5
+  const row = Math.floor((demoCount - 1) / 5)
+
+  cone.position.set(col * step - 0.56, row * step - 0.28, -1)
+  cone.rotation.y = demoCount * 0.35
+
   scene.add(cone)
 }
 
