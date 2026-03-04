@@ -83,7 +83,7 @@ function loadModel() {
       const center = box.getCenter(new THREE.Vector3())
       modelTemplate.position.sub(center)
 
-      modelTemplate.scale.set(0.25, 0.25, 0.25)
+      modelTemplate.scale.set(0.1, 0.1, 0.1)
     },
     undefined,
     (e) => console.error('GLTF load error:', e)
