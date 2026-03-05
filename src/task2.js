@@ -66,7 +66,7 @@ function init() {
       const center = bbox.getCenter(new THREE.Vector3())
       model.position.sub(center)
 
-      model.scale.setScalar(0.3)
+      model.scale.setScalar(0.10)
 
       model.position.set(0, -0.2, -1.4)
 
