@@ -14,6 +14,9 @@ init()
 animate()
 
 function init() {
+  const container = document.createElement('div')
+  document.body.appendChild(container)
+
   scene = new THREE.Scene()
 
   camera = new THREE.PerspectiveCamera(
@@ -27,7 +30,8 @@ function init() {
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(window.innerWidth, window.innerHeight)
   renderer.xr.enabled = true
-  document.body.appendChild(renderer.domElement)
+
+  container.appendChild(renderer.domElement)
 
   const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0)
   hemi.position.set(0, 1, 0)
@@ -37,12 +41,15 @@ function init() {
   dir.position.set(1, 2, 1)
   scene.add(dir)
 
+  const ambient = new THREE.AmbientLight(0xffffff, 0.25)
+  scene.add(ambient)
+
   box = new THREE.Mesh(
     new THREE.BoxGeometry(0.18, 0.18, 0.18),
     new THREE.MeshStandardMaterial({
       color: 0xff4d4d,
       roughness: 0.35,
-      metalness: 0.2
+      metalness: 0.2,
     })
   )
   box.position.copy(basePos.box)
@@ -53,7 +60,7 @@ function init() {
     new THREE.MeshStandardMaterial({
       color: 0x4dff88,
       roughness: 0.25,
-      metalness: 0.1
+      metalness: 0.1,
     })
   )
   tetra.position.copy(basePos.tetra)
@@ -64,7 +71,7 @@ function init() {
     new THREE.MeshStandardMaterial({
       color: 0x4da3ff,
       roughness: 0.15,
-      metalness: 0.35
+      metalness: 0.35,
     })
   )
   ico.position.copy(basePos.ico)
@@ -82,35 +89,32 @@ function animate() {
 }
 
 function render() {
-    const t = performance.now() * 0.001
-  
-    box.rotation.y += 0.01
-    box.rotation.x += 0.005
-    box.scale.setScalar(1 + 0.03 * Math.sin(t))
-    box.position.copy(basePos.box)
-  
-    tetra.rotation.y += 0.012
-    tetra.rotation.x += 0.006
-    tetra.position.set(
-      basePos.tetra.x,
-      basePos.tetra.y + 0.04 * Math.sin(t),
-      basePos.tetra.z
-    )
-  
-    ico.rotation.y += 0.011
-    ico.rotation.x += 0.004
-    ico.scale.setScalar(1 + 0.03 * Math.sin(t))
-  
-    ico.position.set(
-      basePos.ico.x,
-      basePos.ico.y + 0.03,
-      basePos.ico.z
-    )
-  
-    ico.material.color.setHSL(0.58 + 0.05 * Math.sin(t), 0.70, 0.55)
-  
-    renderer.render(scene, camera)
-  }
+  const t = performance.now() * 0.001
+  animateObjects(t)
+
+  renderer.render(scene, camera)
+}
+
+function animateObjects(t) {
+  box.rotation.y += 0.01
+  box.rotation.x += 0.005
+  box.scale.setScalar(1 + 0.03 * Math.sin(t))
+  box.position.copy(basePos.box)
+
+  tetra.rotation.y += 0.012
+  tetra.rotation.x += 0.006
+  tetra.position.set(
+    basePos.tetra.x,
+    basePos.tetra.y + 0.04 * Math.sin(t),
+    basePos.tetra.z
+  )
+
+  ico.rotation.y += 0.011
+  ico.rotation.x += 0.004
+  ico.scale.setScalar(1 + 0.03 * Math.sin(t))
+  ico.position.set(basePos.ico.x, basePos.ico.y + 0.03, basePos.ico.z)
+  ico.material.color.setHSL(0.58 + 0.05 * Math.sin(t), 0.7, 0.55)
+}
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight
