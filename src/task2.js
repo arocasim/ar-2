@@ -32,22 +32,25 @@ function init() {
   renderer.physicallyCorrectLights = true
 
   renderer.toneMapping = THREE.ACESFilmicToneMapping
-  renderer.toneMappingExposure = 1.1
+  renderer.toneMappingExposure = 1.2
 
   renderer.setClearColor(0x000000, 0)
 
   document.body.appendChild(renderer.domElement)
 
-  const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2)
-  hemi.position.set(0, 1, 0)
+  // Основне м’яке освітлення сцени
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x888888, 1.6)
+  hemi.position.set(0, 2, 0)
   scene.add(hemi)
 
-  const key = new THREE.DirectionalLight(0xffffff, 1.6)
-  key.position.set(2.5, 3.5, 2.5)
+  // Основне направлене світло (як сонце)
+  const key = new THREE.DirectionalLight(0xffffff, 2.2)
+  key.position.set(3, 4, 3)
   scene.add(key)
 
-  const fill = new THREE.DirectionalLight(0xffffff, 0.8)
-  fill.position.set(-2, 2, -2)
+  // Додаткове світло для пом’якшення тіней
+  const fill = new THREE.DirectionalLight(0xffffff, 0.6)
+  fill.position.set(-3, 2, -2)
   scene.add(fill)
 
   document.body.appendChild(
