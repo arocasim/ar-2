@@ -66,9 +66,9 @@ function init() {
       const center = bbox.getCenter(new THREE.Vector3())
       model.position.sub(center)
 
-      model.scale.setScalar(0.10)
+      model.scale.setScalar(0.06)
 
-      model.position.set(0, -0.2, -1.4)
+      model.position.set(0, -0.5, -2)
 
       if (FORCE_GOLD_MATERIAL) {
         const gold = new THREE.MeshStandardMaterial({
