@@ -1,5 +1,5 @@
 import './style.css'
 // import './task1.js'
-import './task2.js'
-// import './task3.js'
+// import './task2.js'
+ import './task3.js'
 // import './task4.js'
