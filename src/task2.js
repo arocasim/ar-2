@@ -38,17 +38,14 @@ function init() {
 
   document.body.appendChild(renderer.domElement)
 
-  // Основне м’яке освітлення сцени
   const hemi = new THREE.HemisphereLight(0xffffff, 0x888888, 1.6)
   hemi.position.set(0, 2, 0)
   scene.add(hemi)
 
-  // Основне направлене світло (як сонце)
   const key = new THREE.DirectionalLight(0xffffff, 2.2)
   key.position.set(3, 4, 3)
   scene.add(key)
 
-  // Додаткове світло для пом’якшення тіней
   const fill = new THREE.DirectionalLight(0xffffff, 0.6)
   fill.position.set(-3, 2, -2)
   scene.add(fill)
